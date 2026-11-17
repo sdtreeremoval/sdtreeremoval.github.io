@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a Pickup | SD Christmas Tree Removal</title>
+<meta name="description" content="Book your Christmas tree pickup in San Diego. Pick a date, time and service.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--green:#1F4D2B;--green-dark:#163a20;--cream:#F4EFE4;--gold:#F2C14E;--red:#B3202A;--ink:#1b1b1b;--line:#e2dccd}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--cream);line-height:1.5}
+  h1,h2{font-family:'Bebas Neue',sans-serif;font-weight:400;letter-spacing:.03em;margin:0}
+  .top{background:var(--green);color:var(--cream);text-align:center;padding:36px 20px 40px}
+  .top a.back{color:var(--gold);text-decoration:none;font-weight:600;font-size:15px}
+  .top h1{font-size:clamp(48px,9vw,80px);line-height:1;margin-top:10px}
+  .top p{margin:6px 0 0;font-weight:600}
+  form{max-width:640px;margin:-20px auto 60px;padding:0 16px}
+  .step{background:#fff;border-radius:18px;padding:22px;margin-bottom:16px}
+  .step h2{font-size:30px;color:var(--green);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .step h2 .n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--green);font-size:22px}
+  label.field{display:block;font-weight:600;margin:12px 0 6px}
+  input[type=text],input[type=tel],input[type=email],input[type=date],textarea{width:100%;font:inherit;font-size:16px;padding:13px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;min-height:48px}
+  input:focus,textarea:focus{outline:none;border-color:var(--green)}
+  textarea{min-height:90px;resize:vertical}
+  .hint{font-size:14px;color:#555;margin:6px 0 0}
+  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+  .choice{position:relative}
+  .choice input{position:absolute;opacity:0;pointer-events:none}
+  .choice span{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;font-weight:600;min-height:48px}
+  .choice span small{display:block;font-weight:400;font-size:13px;color:#555}
+  .choice span b{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:28px;color:var(--red);white-space:nowrap}
+  .choice input:checked + span{border-color:var(--green);background:#eef4ef}
+  .choice input:focus-visible + span{outline:3px solid var(--gold);outline-offset:2px}
+  .choice input:disabled + span{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+  .times .choice span{justify-content:center}
+  .list{display:grid;gap:10px}
+  .total{position:sticky;bottom:0;background:var(--green);color:var(--cream);border-radius:18px;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:8px}
+  .total .amt{font-family:'Bebas Neue',sans-serif;font-size:44px;color:var(--gold);line-height:1}
+  .total small{display:block;font-size:13px;opacity:.85}
+  button{font:inherit;font-weight:700;font-size:18px;background:var(--red);color:#fff;border:0;border-radius:999px;padding:15px 26px;cursor:pointer;min-height:48px}
+  button:hover{background:#9a1b24}
+  .err{color:var(--red);font-weight:600;font-size:14px;margin-top:8px;display:none}
+  .fine{font-size:13px;color:#555;text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="back" href="./">← Back to home</a>
+  <h1>Book Your Pickup</h1>
+  <p>Dec 26 – Jan 31 · San Diego</p>
+</header>
+
+<form id="booking" action="https://formsubmit.co/YOUR_EMAIL_HERE" method="POST" novalidate>
+  <input type="hidden" name="_subject" value="New tree pickup booking!">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_next" value="https://sdtreeremoval.github.io/thanks.html">
+  <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <input type="hidden" name="Total price" id="totalField" value="">
+
+  <div class="step">
+    <h2><span class="n">1</span> Pick a Date</h2>
+    <label class="field" for="date">Pickup date</label>
+    <input type="date" id="date" name="Date" min="2026-12-26" max="2027-01-31" required>
+    <p class="hint">Pickups run Dec 26 – Jan 31.</p>
+  </div>
+
+  <div class="step">
+    <h2><span class="n">2</span> Pick a Time</h2>
+    <div class="times" id="times" role="radiogroup" aria-label="Pickup time"></div>
+    <p class="hint" id="timeHint">Pick a date first to see open times.</p>
+  </div>
+
+  <div class="step">
+    <h2><span class="n">3</span> Choose Your Service</h2>
+    <div class="list" role="radiogroup" aria-label="Service">
+      <label class="choice"><input type="radio" name="Service" value="Curbside pickup ($25)" data-price="25" required><span>Curbside pickup<small>Tree is already outside</small><b>$25</b></span></label>
+      <label class="choice"><input type="radio" name="Service" value="We carry it out ($35)" data-price="35"><span>We carry it out<small>We grab it from inside your house</small><b>$35</b></span></label>
+    </div>
+    <label class="field" style="margin-top:18px">Add-ons</label>
+    <div class="list">
+      <label class="choice"><input type="checkbox" name="Add-on: Big tree" value="Yes (+$15)" data-price="15"><span>Big tree<small>8 ft and taller</small><b>+$15</b></span></label>
+      <label class="choice"><input type="checkbox" name="Add-on: Needle cleanup" value="Yes (+$15)" data-price="15"><span>Needle cleanup<small>We vacuum up the needles left behind</small><b>+$15</b></span></label>
+    </div>
+  </div>
+
+  <div class="step">
+    <h2><span class="n">4</span> Your Info</h2>
+    <label class="field" for="name">Name</label>
+    <input type="text" id="name" name="Name" autocomplete="name" required>
+    <label class="field" for="phone">Phone number</label>
+    <input type="tel" id="phone" name="Phone" autocomplete="tel" required>
+    <p class="hint">We'll text you to confirm your pickup.</p>
+    <label class="field" for="email">Email (optional)</label>
+    <input type="email" id="email" name="email" autocomplete="email">
+    <label class="field" for="address">Pickup address</label>
+    <input type="text" id="address" name="Address" autocomplete="street-address" placeholder="Street, city, ZIP" required>
+    <label class="field" for="notes">Anything we should know? (optional)</label>
+    <textarea id="notes" name="Notes" placeholder="Gate code, tree is in the backyard, etc."></textarea>
+  </div>
+
+  <div class="total">
+    <div><small>Your total</small><span class="amt" id="amt">$0</span></div>
+    <button type="submit">Book Pickup</button>
+  </div>
+  <p class="err" id="err" role="alert">Please pick a date, time and service, and fill in your name, phone and address.</p>
+  <p class="fine">Pay when we pick up your tree. We'll text you to confirm your time.</p>
+</form>
+
+<script>
+  // Time slots offered each day. Change these to match when you're free.
+  const SLOTS = ["9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM"];
+  // Slots that are already taken. Format: "YYYY-MM-DD 10:00 AM"
+  const BOOKED = [
+    // "2026-12-27 10:00 AM",
+  ];
+
+  const form = document.getElementById('booking');
+  const dateEl = document.getElementById('date');
+  const timesEl = document.getElementById('times');
+  const hint = document.getElementById('timeHint');
+  const amt = document.getElementById('amt');
+  const totalField = document.getElementById('totalField');
+
+  function renderTimes(){
+    timesEl.innerHTML = '';
+    const d = dateEl.value;
+    if(!d){ hint.style.display='block'; return; }
+    hint.style.display = 'none';
+    let open = 0;
+    SLOTS.forEach(t => {
+      const taken = BOOKED.includes(d + ' ' + t);
+      if(!taken) open++;
+      const lab = document.createElement('label');
+      lab.className = 'choice';
+      lab.innerHTML = '<input type="radio" name="Time" value="'+t+'"'+(taken?' disabled':'')+' required><span>'+t+'</span>';
+      timesEl.appendChild(lab);
+    });
+    if(open === 0){ hint.textContent = 'That day is full. Try another date.'; hint.style.display='block'; }
+  }
+
+  function updateTotal(){
+    let total = 0;
+    form.querySelectorAll('input[data-price]:checked').forEach(i => total += Number(i.dataset.price));
+    amt.textContent = '$' + total;
+    totalField.value = '$' + total;
+  }
+
+  dateEl.addEventListener('change', renderTimes);
+  form.addEventListener('change', updateTotal);
+
+  form.addEventListener('submit', e => {
+    const ok = dateEl.value && form.querySelector('input[name=Time]:checked') &&
+      form.querySelector('input[name=Service]:checked') &&
+      form.Name.value.trim() && form.Phone.value.trim() && form.Address.value.trim();
+    const err = document.getElementById('err');
+    if(!ok){ e.preventDefault(); err.style.display='block'; err.scrollIntoView({behavior:'smooth',block:'center'}); }
+    else { err.style.display='none'; updateTotal(); }
+  });
+</script>
+</body>
+</html>
