@@ -26,7 +26,7 @@
   input:focus,textarea:focus{outline:none;border-color:var(--green)}
   textarea{min-height:90px;resize:vertical}
   .hint{font-size:14px;color:#555;margin:6px 0 0}
-  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
   .choice{position:relative}
   .choice input{position:absolute;opacity:0;pointer-events:none}
   .choice span{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;font-weight:600;min-height:48px}
@@ -51,7 +51,7 @@
 <header class="top">
   <a class="back" href="./">← Back to home</a>
   <h1>Book Your Pickup</h1>
-  <p>Dec 27 – 29 only · San Diego</p>
+  <p>Dec 26 – 29 only · San Diego</p>
 </header>
 
 <form id="booking" action="https://formsubmit.co/YOUR_EMAIL_HERE" method="POST" novalidate>
@@ -64,11 +64,12 @@
   <div class="step">
     <h2><span class="n">1</span> Pick a Date</h2>
     <div class="times" role="radiogroup" aria-label="Pickup date">
-      <label class="choice"><input type="radio" name="Date" value="Sun, Dec 27" required><span>Sun, Dec 27</span></label>
+      <label class="choice"><input type="radio" name="Date" value="Sat, Dec 26" required><span>Sat, Dec 26</span></label>
+      <label class="choice"><input type="radio" name="Date" value="Sun, Dec 27"><span>Sun, Dec 27</span></label>
       <label class="choice"><input type="radio" name="Date" value="Mon, Dec 28"><span>Mon, Dec 28</span></label>
       <label class="choice"><input type="radio" name="Date" value="Tue, Dec 29"><span>Tue, Dec 29</span></label>
     </div>
-    <p class="hint">We're only picking up trees Dec 27, 28 and 29.</p>
+    <p class="hint">We're only picking up trees Dec 26, 27, 28 and 29.</p>
   </div>
 
   <div class="step">
@@ -115,10 +116,10 @@
 
 <script>
   // Time slots offered each day. Change these to match when you're free.
-  const SLOTS = ["8:00 – 9:30 AM","9:30 – 11:00 AM","11:00 AM – 12:30 PM","12:30 – 2:00 PM","2:00 – 3:30 PM","3:30 – 5:00 PM"];
-  // Slots that are already taken. Format: "Sun, Dec 27 8:00 – 9:30 AM"
+  const SLOTS = ["8:00 AM","9:30 AM","11:00 AM","12:30 PM","2:00 PM","3:30 PM"];
+  // Slots that are already taken. Format: "Sun, Dec 27 8:00 AM"
   const BOOKED = [
-    // "Sun, Dec 27 8:00 – 9:30 AM",
+    // "Sun, Dec 27 8:00 AM",
   ];
 
   const form = document.getElementById('booking');
