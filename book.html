@@ -26,7 +26,7 @@
   input:focus,textarea:focus{outline:none;border-color:var(--green)}
   textarea{min-height:90px;resize:vertical}
   .hint{font-size:14px;color:#555;margin:6px 0 0}
-  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+  .times{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
   .choice{position:relative}
   .choice input{position:absolute;opacity:0;pointer-events:none}
   .choice span{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;font-weight:600;min-height:48px}
@@ -51,7 +51,7 @@
 <header class="top">
   <a class="back" href="./">← Back to home</a>
   <h1>Book Your Pickup</h1>
-  <p>Dec 26 – Jan 31 · San Diego</p>
+  <p>Dec 27 – 29 only · San Diego</p>
 </header>
 
 <form id="booking" action="https://formsubmit.co/YOUR_EMAIL_HERE" method="POST" novalidate>
@@ -63,9 +63,12 @@
 
   <div class="step">
     <h2><span class="n">1</span> Pick a Date</h2>
-    <label class="field" for="date">Pickup date</label>
-    <input type="date" id="date" name="Date" min="2026-12-26" max="2027-01-31" required>
-    <p class="hint">Pickups run Dec 26 – Jan 31.</p>
+    <div class="times" role="radiogroup" aria-label="Pickup date">
+      <label class="choice"><input type="radio" name="Date" value="Sun, Dec 27" required><span>Sun, Dec 27</span></label>
+      <label class="choice"><input type="radio" name="Date" value="Mon, Dec 28"><span>Mon, Dec 28</span></label>
+      <label class="choice"><input type="radio" name="Date" value="Tue, Dec 29"><span>Tue, Dec 29</span></label>
+    </div>
+    <p class="hint">We're only picking up trees Dec 27, 28 and 29.</p>
   </div>
 
   <div class="step">
@@ -112,22 +115,22 @@
 
 <script>
   // Time slots offered each day. Change these to match when you're free.
-  const SLOTS = ["9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM"];
-  // Slots that are already taken. Format: "YYYY-MM-DD 10:00 AM"
+  const SLOTS = ["8:00 – 9:30 AM","9:30 – 11:00 AM","11:00 AM – 12:30 PM","12:30 – 2:00 PM","2:00 – 3:30 PM","3:30 – 5:00 PM"];
+  // Slots that are already taken. Format: "Sun, Dec 27 8:00 – 9:30 AM"
   const BOOKED = [
-    // "2026-12-27 10:00 AM",
+    // "Sun, Dec 27 8:00 – 9:30 AM",
   ];
 
   const form = document.getElementById('booking');
-  const dateEl = document.getElementById('date');
-  const timesEl = document.getElementById('times');
+    const timesEl = document.getElementById('times');
   const hint = document.getElementById('timeHint');
   const amt = document.getElementById('amt');
   const totalField = document.getElementById('totalField');
 
   function renderTimes(){
     timesEl.innerHTML = '';
-    const d = dateEl.value;
+    const picked = form.querySelector('input[name=Date]:checked');
+    const d = picked ? picked.value : '';
     if(!d){ hint.style.display='block'; return; }
     hint.style.display = 'none';
     let open = 0;
@@ -149,11 +152,11 @@
     totalField.value = '$' + total;
   }
 
-  dateEl.addEventListener('change', renderTimes);
+  form.querySelectorAll('input[name=Date]').forEach(r => r.addEventListener('change', renderTimes));
   form.addEventListener('change', updateTotal);
 
   form.addEventListener('submit', e => {
-    const ok = dateEl.value && form.querySelector('input[name=Time]:checked') &&
+    const ok = form.querySelector('input[name=Date]:checked') && form.querySelector('input[name=Time]:checked') &&
       form.querySelector('input[name=Service]:checked') &&
       form.Name.value.trim() && form.Phone.value.trim() && form.Address.value.trim();
     const err = document.getElementById('err');
