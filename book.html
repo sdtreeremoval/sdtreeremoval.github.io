@@ -54,12 +54,8 @@
   <p>Dec 26 – 29 only · San Diego</p>
 </header>
 
-<form id="booking" action="https://formsubmit.co/YOUR_EMAIL_HERE" method="POST" novalidate>
-  <input type="hidden" name="_subject" value="New tree pickup booking!">
-  <input type="hidden" name="_template" value="table">
-  <input type="hidden" name="_next" value="https://sdtreeremoval.github.io/thanks.html">
-  <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
-  <input type="hidden" name="Total price" id="totalField" value="">
+<form id="booking" novalidate>
+  <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
 
   <div class="step">
     <h2><span class="n">1</span> Pick a Date</h2>
@@ -86,8 +82,8 @@
     </div>
     <label class="field" style="margin-top:18px">Add-ons</label>
     <div class="list">
-      <label class="choice"><input type="checkbox" name="Add-on: Big tree" value="Yes (+$15)" data-price="15"><span>Big tree<small>8 ft and taller</small><b>+$15</b></span></label>
-      <label class="choice"><input type="checkbox" name="Add-on: Needle cleanup" value="Yes (+$15)" data-price="15"><span>Needle cleanup<small>We vacuum up the needles left behind</small><b>+$15</b></span></label>
+      <label class="choice"><input type="checkbox" name="Add-on: Big tree" value="Yes (+$15)" data-price="15" id="bigTree"><span>Big tree<small>8 ft and taller</small><b>+$15</b></span></label>
+      <label class="choice"><input type="checkbox" name="Add-on: Needle cleanup" value="Yes (+$15)" data-price="15" id="needles"><span>Needle cleanup<small>We vacuum up the needles left behind</small><b>+$15</b></span></label>
     </div>
   </div>
 
@@ -115,24 +111,30 @@
 </form>
 
 <script>
-  // Time slots offered each day. Change these to match when you're free.
+  // Paste the Google Apps Script web app URL here (ends in /exec)
+  const SCRIPT_URL = "";
   const SLOTS = ["8:00 AM","9:30 AM","11:00 AM","12:30 PM","2:00 PM","3:30 PM"];
-  // Slots that are already taken. Format: "Sun, Dec 27 8:00 AM"
-  const BOOKED = [
-    // "Sun, Dec 27 8:00 AM",
-  ];
+  let BOOKED = [];
 
   const form = document.getElementById('booking');
-    const timesEl = document.getElementById('times');
+  const timesEl = document.getElementById('times');
   const hint = document.getElementById('timeHint');
   const amt = document.getElementById('amt');
-  const totalField = document.getElementById('totalField');
+  const err = document.getElementById('err');
+  const btn = form.querySelector('button[type=submit]');
+
+  function loadTaken(){
+    if(!SCRIPT_URL) return Promise.resolve();
+    return fetch(SCRIPT_URL).then(r => r.json()).then(d => { BOOKED = d.taken || []; renderTimes(); }).catch(() => {});
+  }
 
   function renderTimes(){
+    const keep = form.querySelector('input[name=Time]:checked');
+    const keepVal = keep ? keep.value : '';
     timesEl.innerHTML = '';
     const picked = form.querySelector('input[name=Date]:checked');
     const d = picked ? picked.value : '';
-    if(!d){ hint.style.display='block'; return; }
+    if(!d){ hint.textContent = 'Pick a date first to see open times.'; hint.style.display='block'; return; }
     hint.style.display = 'none';
     let open = 0;
     SLOTS.forEach(t => {
@@ -140,30 +142,55 @@
       if(!taken) open++;
       const lab = document.createElement('label');
       lab.className = 'choice';
-      lab.innerHTML = '<input type="radio" name="Time" value="'+t+'"'+(taken?' disabled':'')+' required><span>'+t+'</span>';
+      lab.innerHTML = '<input type="radio" name="Time" value="'+t+'"'+(taken?' disabled':'')+(t===keepVal&&!taken?' checked':'')+'><span>'+(taken?t+' · Taken':t)+'</span>';
       timesEl.appendChild(lab);
     });
-    if(open === 0){ hint.textContent = 'That day is full. Try another date.'; hint.style.display='block'; }
+    if(open === 0){ hint.textContent = 'That day is full. Try another day.'; hint.style.display='block'; }
   }
 
-  function updateTotal(){
+  function getTotal(){
     let total = 0;
     form.querySelectorAll('input[data-price]:checked').forEach(i => total += Number(i.dataset.price));
-    amt.textContent = '$' + total;
-    totalField.value = '$' + total;
+    return total;
   }
+  function updateTotal(){ amt.textContent = '$' + getTotal(); }
+
+  function showErr(msg){ err.textContent = msg; err.style.display='block'; err.scrollIntoView({behavior:'smooth',block:'center'}); }
 
   form.querySelectorAll('input[name=Date]').forEach(r => r.addEventListener('change', renderTimes));
   form.addEventListener('change', updateTotal);
 
   form.addEventListener('submit', e => {
-    const ok = form.querySelector('input[name=Date]:checked') && form.querySelector('input[name=Time]:checked') &&
-      form.querySelector('input[name=Service]:checked') &&
-      form.Name.value.trim() && form.Phone.value.trim() && form.Address.value.trim();
-    const err = document.getElementById('err');
-    if(!ok){ e.preventDefault(); err.style.display='block'; err.scrollIntoView({behavior:'smooth',block:'center'}); }
-    else { err.style.display='none'; updateTotal(); }
+    e.preventDefault();
+    const date = form.querySelector('input[name=Date]:checked');
+    const time = form.querySelector('input[name=Time]:checked');
+    const service = form.querySelector('input[name=Service]:checked');
+    if(!(date && time && service && form.Name.value.trim() && form.Phone.value.trim() && form.Address.value.trim())){
+      showErr('Please pick a day, time and service, and fill in your name, phone and address.'); return;
+    }
+    if(!SCRIPT_URL){ showErr('Online booking is almost ready. For now, DM us on Instagram to book.'); return; }
+    err.style.display = 'none';
+    const data = new URLSearchParams({
+      date: date.value, time: time.value, service: service.value,
+      bigTree: document.getElementById('bigTree').checked ? 'Yes' : 'No',
+      needles: document.getElementById('needles').checked ? 'Yes' : 'No',
+      total: '$' + getTotal(),
+      name: form.Name.value.trim(), phone: form.Phone.value.trim(), email: form.email.value.trim(),
+      address: form.Address.value.trim(), notes: form.Notes.value.trim(), website: form.website.value
+    });
+    btn.disabled = true; btn.textContent = 'Booking...';
+    fetch(SCRIPT_URL, { method: 'POST', body: data })
+      .then(r => r.json())
+      .then(res => {
+        if(res.ok){ location.href = 'thanks.html'; return; }
+        if(res.error === 'taken'){ BOOKED = res.taken || BOOKED; renderTimes(); showErr('Sorry, someone just grabbed that time. Pick another one.'); }
+        else { showErr('Something was missing. Check your info and try again.'); }
+      })
+      .catch(() => showErr('Something went wrong. Try again, or DM us on Instagram.'))
+      .finally(() => { btn.disabled = false; btn.textContent = 'Book Pickup'; });
   });
+
+  loadTaken();
 </script>
 </body>
 </html>
